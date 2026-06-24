@@ -83,6 +83,8 @@ html,body{height:100%;font-family:'Heebo',sans-serif;direction:rtl;background:#f
 .cp-grid{display:flex;flex-wrap:wrap;gap:8px;max-width:240px;}
 .cp-swatch{width:34px;height:34px;border-radius:10px;cursor:pointer;border:3px solid transparent;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,.1);}
 .cp-swatch:hover{transform:scale(1.2);border-color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);}
+.cp-custom{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;padding-top:12px;border-top:2px solid #eee;font-size:.85em;font-weight:700;color:#636e72;cursor:pointer;}
+.cp-custom-input{width:44px;height:34px;border:2px solid #dfe6e9;border-radius:8px;cursor:pointer;background:#fff;padding:2px;}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:999;display:none;}
 .overlay.show{display:block;}
 
@@ -186,7 +188,7 @@ html,body{height:100%;font-family:'Heebo',sans-serif;direction:rtl;background:#f
 /* card modal */
 .card-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .card-modal-overlay.show{display:flex;}
-.card-modal{background:#fff;border-radius:28px;padding:40px 36px;max-width:480px;width:92%;text-align:center;animation:flipCard .6s ease;border:5px solid;box-shadow:0 24px 80px rgba(0,0,0,.3);perspective:600px;}
+.card-modal{background:#fff;border-radius:28px;padding:40px 36px;max-width:480px;width:92%;text-align:center;animation:flipCard .6s ease;border:5px solid;box-shadow:0 24px 80px rgba(0,0,0,.3);perspective:600px;cursor:pointer;}
 .card-modal .card-emoji{font-size:3em;margin-bottom:8px;}
 .card-modal .card-cat{font-size:1.05em;font-weight:900;margin-bottom:10px;letter-spacing:.02em;}
 .card-modal .card-title-display{font-size:1.5em;font-weight:900;margin-bottom:14px;color:#2d3436;}
@@ -297,12 +299,12 @@ html,body{height:100%;font-family:'Heebo',sans-serif;direction:rtl;background:#f
 </div>
 
 <div class="card-modal-overlay" id="cardModal" onclick="closeCardModal()">
-  <div class="card-modal" id="cardModalInner" onclick="event.stopPropagation()">
+  <div class="card-modal" id="cardModalInner" onclick="closeCardModal()">
     <div class="card-emoji">🃏</div>
     <div class="card-cat" id="cardModalCat"></div>
     <div class="card-title-display" id="cardModalTitle"></div>
     <div class="card-content" id="cardModalContent"></div>
-    <button class="card-close-btn" onclick="closeCardModal()">🔄 לחץ לסגור</button>
+    <button class="card-close-btn" onclick="closeCardModal()">👆 לחץ על הקלף לסגור</button>
   </div>
 </div>
 
@@ -527,6 +529,11 @@ let cpCallback=null;
 function openColorPicker(anchor,cb){
   cpCallback=cb;const grid=document.getElementById('cpGrid');grid.innerHTML='';
   CATEGORY_COLORS.forEach(c=>{const sw=el('div','cp-swatch');sw.style.background=c;sw.onclick=()=>{if(cpCallback)cpCallback(c);closeColorPicker();};grid.append(sw);});
+  const customWrap=el('label','cp-custom');customWrap.textContent='🎨 בחירת צבע מותאם אישית';
+  const custom=document.createElement('input');custom.type='color';custom.className='cp-custom-input';
+  custom.oninput=()=>{if(cpCallback)cpCallback(custom.value);};
+  custom.onchange=()=>{closeColorPicker();};
+  customWrap.append(custom);grid.append(customWrap);
   document.getElementById('cpOverlay').classList.add('show');document.getElementById('cpPopup').classList.add('show');
 }
 function closeColorPicker(){document.getElementById('cpOverlay').classList.remove('show');document.getElementById('cpPopup').classList.remove('show');cpCallback=null;}
@@ -744,10 +751,13 @@ function showCardModal(card,catId){
     var inner=document.getElementById('cardModalInner');
     inner.style.borderColor=color;
     inner.style.boxShadow='0 24px 80px rgba(0,0,0,.3), 0 0 40px '+color+'44';
-    var showCatName=(catObj && catObj.showName)?catObj.name:'';
+    var revealCat=!!(catObj && catObj.showName);
+    var showCatName=revealCat?catObj.name:'';
     document.getElementById('cardModalCat').textContent=showCatName;
     document.getElementById('cardModalCat').style.color=color;
-    document.getElementById('cardModalTitle').textContent=card.title||'';
+    var titleText=card.title||'';
+    if(!revealCat && catObj && titleText.trim() && titleText.trim()===(catObj.name||'').trim()){titleText='';}
+    document.getElementById('cardModalTitle').textContent=titleText;
     document.getElementById('cardModalContent').textContent=card.body||'';
     inner.style.animation='none';inner.offsetHeight;inner.style.animation='flipCard .6s ease';
     modal.classList.add('show');
