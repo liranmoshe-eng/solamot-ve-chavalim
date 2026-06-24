@@ -335,6 +335,7 @@ const CATEGORY_COLORS = [
 const CELL_COLORS = ['c0','c1','c2','c3','c4','c5','c6','c7','c8','c9'];
 
 const DEFAULT_CONFIG = {
+  version: 2,
   categories: [
     {id:1, name:'שאלת סיכום שנה', color:'#6c5ce7', showName:true},
     {id:2, name:'משימה קבוצתית', color:'#e17055', showName:true}
@@ -518,6 +519,13 @@ function loadConfig(){
     const saved=localStorage.getItem('snl_config');
     if(saved){
       config=JSON.parse(saved);
+      if(config.version!==DEFAULT_CONFIG.version){
+        config=JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        nextCatId=Math.max(...config.categories.map(c=>c.id),0)+1;
+        nextCardId=Math.max(...config.cards.map(c=>c.id),0)+1;
+        saveConfig();
+        return;
+      }
       if(!config.categories||config.categories.length===0){config.categories=DEFAULT_CONFIG.categories;}
       if(!config.cards||config.cards.length===0){config.cards=DEFAULT_CONFIG.cards;}
       if(!config.specialSquares||config.specialSquares.length===0){config.specialSquares=DEFAULT_CONFIG.specialSquares;config.squareCatMap=DEFAULT_CONFIG.squareCatMap;}
