@@ -126,7 +126,7 @@ html,body{height:100%;font-family:'Heebo',sans-serif;direction:rtl;background:#f
 /* board */
 .board-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px;position:relative;}
 .board-container{position:relative;width:min(calc(100vw - 108px), 98vh);height:min(calc(100vw - 108px), 98vh);max-width:900px;max-height:900px;}
-.board-grid{display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);width:100%;height:100%;gap:1px;border-radius:8px;overflow:hidden;border:3px solid #2d3436;background:#2d3436;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.board-grid{direction:ltr;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);width:100%;height:100%;gap:1px;border-radius:8px;overflow:hidden;border:3px solid #2d3436;background:#2d3436;box-shadow:0 8px 32px rgba(0,0,0,.2);}
 .cell{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;cursor:default;overflow:visible;}
 .cell .cell-num{position:absolute;top:2px;right:4px;font-size:14px;font-weight:900;color:rgba(0,0,0,.85);z-index:2;text-shadow:0 1px 3px rgba(255,255,255,.9);}
 .cell.c0{background:#a8e6cf;}
@@ -580,9 +580,8 @@ function renderGameUI(){
 
 // ══ BOARD ══
 function cellToGrid(num){const row=Math.floor((num-1)/10);const col=(row%2===0)?(num-1)%10:9-((num-1)%10);return{row:9-row,col};}
-function visualCol(col){return 9-col;}
-function cellCenter(num){const{row,col}=cellToGrid(num);const vc=visualCol(col);return{x:vc*10+5,y:row*10+5};}
-function cellPixelPos(num){const{row,col}=cellToGrid(num);const vc=visualCol(col);const cellW=100/10;return{xPct:vc*cellW+cellW/2,yPct:row*cellW+cellW/2};}
+function cellCenter(num){const{row,col}=cellToGrid(num);return{x:col*10+5,y:row*10+5};}
+function cellPixelPos(num){const{row,col}=cellToGrid(num);const cellW=100/10;return{xPct:col*cellW+cellW/2,yPct:row*cellW+cellW/2};}
 
 function renderBoard(){
   const grid=document.getElementById('boardGrid');grid.innerHTML='';
