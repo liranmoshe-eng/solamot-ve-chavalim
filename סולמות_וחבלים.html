@@ -356,7 +356,6 @@ const DEFAULT_CONFIG = {
     {id:13, catId:2, title:'', body:'כולם ביחד עושים 10 קפיצות במקום'},
     {id:14, catId:2, title:'', body:'עושים גל מקסיקני - אחד אחרי השני קמים ויושבים'},
     {id:15, catId:2, title:'', body:'ספירה לאחור מ-10 עד 1 בקול רם יחד'},
-    {id:16, catId:2, title:'', body:'כולם ביחד עושים חיבוק קבוצתי גדול'},
     {id:17, catId:2, title:'', body:'כולם ביחד הופכים לפסלים וקופאים במקום למשך 10 שניות'}
   ],
   specialSquares: [5,11,17,23,30,36,42,48,55,61,67,73,80,86,92,97],
@@ -578,6 +577,17 @@ function buildCardPool(){
     const catCards=config.cards.filter(c=>Number(c.catId)===cid);
     cardPool[cid]=shuffle([...catCards]);
   });
+  // ערימה כללית לקלפים ללא קטגוריה משויכת
+  cardPool['__all__']=shuffle([...config.cards]);
+}
+
+// שולף קלף מתוך ערימה מעורבבת ללא חזרות; כשהערימה נגמרת מערבבים מחדש
+function drawFromPool(key,sourceCards){
+  if(!sourceCards||sourceCards.length===0) return null;
+  if(!cardPool[key]||cardPool[key].length===0){
+    cardPool[key]=shuffle([...sourceCards]);
+  }
+  return cardPool[key].pop();
 }
 
 function renderGameUI(){
@@ -738,11 +748,12 @@ function getRandomCard(posNum){
       if(Number(config.cards[i].catId) === cid) matching.push(config.cards[i]);
     }
     if(matching.length > 0){
-      return {card: matching[Math.floor(Math.random()*matching.length)], catId: cid};
+      var drawn = drawFromPool(cid, matching);
+      if(drawn) return {card: drawn, catId: cid};
     }
   }
-  var idx = Math.floor(Math.random()*config.cards.length);
-  return {card: config.cards[idx], catId: catId};
+  var anyCard = drawFromPool('__all__', config.cards);
+  return anyCard ? {card: anyCard, catId: catId} : null;
 }
 
 function finishTurn(){currentPlayerIdx=(currentPlayerIdx+1)%players.length;isRolling=false;var diceEl=document.getElementById('floatingDice');diceEl.style.pointerEvents='auto';diceEl.style.opacity='1';renderGameUI();}
